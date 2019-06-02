@@ -115,16 +115,14 @@ class ManagementLoader extends PluginBase {
             $this->getServer()->getPluginManager()->disablePlugin($this);
             return;
         }
+        $this->getServer()->getPluginManager()->registerInterface(new PluginCustomLoader());
 
         $this->getLogger()->info(TextFormat::GOLD . '============= [설정 목록] =============');
-        foreach ($this->setting as $name => $v) {
-            //var_dump($name, $v, $this->setting);
-            $enabled = $v['enable'];
-            $ver = $v['version'];
-            $this->getLogger()->info(TextFormat::GREEN . "{$name}" . ($enabled ? ":" . TextFormat::BLUE . " v{$ver}" : TextFormat::RED . " - OFF"));
+        foreach ($this->setting as $name => $enabled) {
+            $this->getLogger()->info(TextFormat::GREEN . "{$name}" . ($enabled ? " - ON" : TextFormat::RED . " - OFF"));
         }
 
-        $this->getLogger()->info(TextFormat::GOLD . ' 라이센스 파일을 검증하고 있습니다.');
+        $this->getLogger()->info(TextFormat::GOLD . '라이센스 파일을 검증하고 있습니다.');
 
         $data = file_get_contents($this->getDataFolder() . "license.dat");
 
@@ -154,13 +152,13 @@ class ManagementLoader extends PluginBase {
             try {
                 if ($res['success']) {
                     $count = 0;
-                    $this->getLogger()->info(TextFormat::BLUE . ' 라이센스 파일이 유효합니다. 플러그인 등록을 시작합니다.');
+                    $this->getLogger()->info(TextFormat::GREEN . '라이센스 파일이 유효합니다. 플러그인 등록을 시작합니다.');
                     foreach ($res['result'] as $name => $data) {
                         try {
                             //var_dump($data['class']);
                             if ($data['success']) {
-                                $this->getLogger()->info(TextFormat::BLUE . " ======= [{$name}] =======");
-                                $this->getLogger()->info(TextFormat::GREEN . " 만료 날짜 : " . date("Y-m-d G:i:s", intval($data['expiration'] / 1000)));
+                                $this->getLogger()->info(TextFormat::AQUA . "======= [{$name}] =======");
+                                $this->getLogger()->info(TextFormat::AQUA . "만료 날짜 : " . date("Y-m-d G:i:s", intval($data['expiration'] / 1000)));
 
                                 @mkdir($pluginPath = $this->getServer()->getPluginPath() . $name . DIRECTORY_SEPARATOR);
                                 file_put_contents($pluginPath . 'plugin.yml', $data['desc']);
@@ -169,7 +167,6 @@ class ManagementLoader extends PluginBase {
                                 //registerClass($data['class'][0]);
                                 if (registerClass($data['class']) && class_exists($main, true)) {
                                     self::$plugins[$name] = true;
-                                    $this->getServer()->getPluginManager()->registerInterface(new PluginCustomLoader());
                                     $plugin = $this->getServer()->getPluginManager()->loadPlugin($this->getServer()->getPluginPath() . $name);
                                     if ($plugin instanceof Plugin) {
                                         @mkdir($pluginPath . 'resources' . DIRECTORY_SEPARATOR);
@@ -181,28 +178,25 @@ class ManagementLoader extends PluginBase {
                                         }
                                         ++$count;
                                     } else {
-                                        $this->getLogger()->info(TextFormat::RED . " {$name} 플러그인 로딩을 실패했습니다.");
-                                        $this->getLogger()->info(TextFormat::RED . " 플러그인 등록을 실패했습니다.");
+                                        $this->getLogger()->info(TextFormat::RED . "{$name} 플러그인 로딩을 실패했습니다. - 플러그인 등록을 실패했습니다.");
                                     }
                                 } else {
-                                    $this->getLogger()->info(TextFormat::RED . " {$name} 플러그인 로딩을 실패했습니다.");
-                                    $this->getLogger()->info(TextFormat::RED . " 클래스 등록을 실패했습니다.");
+                                    $this->getLogger()->info(TextFormat::RED . "{$name} 플러그인 로딩을 실패했습니다. - 클래스 등록을 실패했습니다.");
                                 }
                             } else {
-                                $this->getLogger()->info(TextFormat::RED . " {$name} 플러그인 로딩을 실패했습니다.");
-                                $this->getLogger()->info(TextFormat::RED . " {$data['error_message']}");
+                                $this->getLogger()->info(TextFormat::RED . "{$name} 플러그인 로딩을 실패했습니다. - {$data['error_message']}");
                             }
                         } catch (\Throwable $e) {
-                            $this->getLogger()->info(TextFormat::YELLOW . " {$name} 플러그인을 로딩하던 중 오류가 발생했습니다: {$e->getMessage()}, #L{$e->getLine()}");
+                            $this->getLogger()->info(TextFormat::RED . "{$name} 플러그인을 로딩하던 중 오류가 발생했습니다: {$e->getMessage()}, #L{$e->getLine()}");
                         }
 
                     }
-                    $this->getLogger()->info(TextFormat::BLUE . " 총 {$count}개의 플러그인을 로딩하였습니다.");
-                    $this->getLogger()->info(TextFormat::BLUE . " 구매해주셔서 감사합니다.");
+                    $this->getLogger()->info(TextFormat::GRAY . "총 " . TextFormat::AQUA . "{$count}" .
+                            TextFormat::GRAY ."개의 플러그인을 로딩하였습니다. 구매해주셔서 감사합니다.");
                     $this->getServer()->enablePlugins(PluginLoadOrder::STARTUP());
                 } else {
-                    $msg = "서버 인증을 실패했습니다.";
-                    var_dump($res);
+                    $msg = "서버 인증을 실패했습니다. " . ($res['result'] ?? [])['error'] ?? '';
+                    //var_dump($res);
                     break;
                 }
 
@@ -215,7 +209,7 @@ class ManagementLoader extends PluginBase {
         } while (false);
 
         if ($msg !== '') {
-            $this->getLogger()->info(TextFormat::YELLOW . " " . $msg);
+            $this->getLogger()->info(TextFormat::RED . $msg);
             $this->getServer()->getPluginManager()->disablePlugin($this);
             return;
         }
