@@ -1,18 +1,6 @@
 {
-  "GuildPlus": {
-    "enable": true,
-    "version": "1.0.0"
-  },
-  "GuildExtension": {
-    "enable": true,
-    "version": "1.0.0"
-  },
-  "AdvancedPrefix": {
-    "enable": true,
-    "version": "1.0.0"
-  },
-  "PrefixAddon": {
-    "enable": true,
-    "version": "1.0.0"
-  }
+  "GuildPlus": true,
+  "GuildExtension": true,
+  "AdvancedPrefix": true,
+  "PrefixAddon": true
 }
