@@ -195,8 +195,8 @@ class ManagementLoader extends PluginBase {
                             TextFormat::GRAY ."개의 플러그인을 로딩하였습니다. 구매해주셔서 감사합니다.");
                     $this->getServer()->enablePlugins(PluginLoadOrder::STARTUP());
                 } else {
-                    $msg = "서버 인증을 실패했습니다. " . ($res['result'] ?? [])['error'] ?? '';
-                    //var_dump($res);
+                    $msg = "서버 인증을 실패했습니다. " . (($res['result'] ?? [])['error']) ?? '';
+                    var_dump($res);
                     break;
                 }
 
